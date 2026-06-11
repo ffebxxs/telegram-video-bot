@@ -29,4 +29,8 @@ def start(message):
             "Bot aktif."
         )
 
+@bot.message_handler(content_types=['video'])
+def get_video(message):
+    bot.reply_to(message, message.video.file_id)
+
 bot.infinity_polling()
