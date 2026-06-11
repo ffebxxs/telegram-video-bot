@@ -2,7 +2,7 @@ import telebot
 import json
 import os
 
-TOKEN = "TOKEN_BARU_KAMU"
+TOKEN = "8864599968:AAG4z97tu5oagVpEwJWcssswplQiXEnjyVU"
 
 ADMIN_ID = 8442594829
 
