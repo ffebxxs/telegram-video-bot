@@ -4,7 +4,7 @@ import os
 
 TOKEN = "TOKEN_BARU_KAMU"
 
-ADMIN_ID = ADMIN_ID_KAMU
+ADMIN_ID = 8442594829
 
 CHANNEL_USERNAME = "@enakkinajaa"
 GROUP_USERNAME = "@enakkann"
