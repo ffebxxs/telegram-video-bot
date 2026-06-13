@@ -57,38 +57,35 @@ def save_videos(data):
 # FORCE JOIN CHECK
 
 # =========================
-
 def is_member(user_id):
-try:
-channel_member = bot.get_chat_member(
-CHANNEL_USERNAME,
-user_id
-)
+    try:
+        channel_member = bot.get_chat_member(
+            CHANNEL_USERNAME,
+            user_id
+        )
 
-```
-    group_member = bot.get_chat_member(
-        GROUP_USERNAME,
-        user_id
-    )
+        group_member = bot.get_chat_member(
+            GROUP_USERNAME,
+            user_id
+        )
 
-    channel_ok = channel_member.status in [
-        "member",
-        "administrator",
-        "creator"
-    ]
+        channel_ok = channel_member.status in [
+            "member",
+            "administrator",
+            "creator"
+        ]
 
-    group_ok = group_member.status in [
-        "member",
-        "administrator",
-        "creator"
-    ]
+        group_ok = group_member.status in [
+            "member",
+            "administrator",
+            "creator"
+        ]
 
-    return channel_ok and group_ok
+        return channel_ok and group_ok
 
-except Exception as e:
-    logging.error(e)
-    return False
-```
+    except Exception as e:
+        logging.error(e)
+        return False
 
 # =========================
 
@@ -98,10 +95,10 @@ except Exception as e:
 
 @bot.message_handler(commands=["id"])
 def get_id(message):
-bot.reply_to(
-message,
-f"Your ID: {message.from_user.id}"
-)
+    bot.reply_to(
+        message,
+        f"Your ID: {message.from_user.id}"
+    )
 
 # =========================
 
@@ -112,7 +109,7 @@ f"Your ID: {message.from_user.id}"
 @bot.message_handler(content_types=["video"])
 def upload_video(message):
 
-```
+
 if message.from_user.id != ADMIN_ID:
     bot.reply_to(
         message,
@@ -137,7 +134,6 @@ link = (
 bot.reply_to(
     message,
     f"""
-```
 
 ✅ Video berhasil disimpan
 
@@ -157,7 +153,7 @@ Link:
 @bot.message_handler(commands=["start"])
 def start(message):
 
-```
+
 args = message.text.split()
 
 if len(args) < 2:
