@@ -1,6 +1,8 @@
 import telebot
 import json
 import os
+users = set()
+USER_FILE = "users.json"
 
 TOKEN = "8864599968:AAG4z97tu5oagVpEwJWcssswplQiXEnjyVU"
 bot = telebot.TeleBot(TOKEN)
@@ -23,11 +25,16 @@ if os.path.exists(DATA_FILE):
         videos = json.load(f)
 else:
     videos = {}
+    users = set()
 
 def save_data():
     with open(DATA_FILE, "w") as f:
         json.dump(videos, f)
 
+def save_user(user_id):
+    users.add(user_id)
+    with open(USER_FILE, "w") as f:
+        json.dump(list(users), f)
 # ======================
 # CEK JOIN
 # ======================
@@ -45,7 +52,9 @@ def check_join(user_id):
 # START LINK HANDLER
 # ======================
 @bot.message_handler(commands=['start'])
+
 def start(message):
+    save_user(message.from_user.id)
     args = message.text.split()
 
     if len(args) == 1:
