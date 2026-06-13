@@ -2,6 +2,8 @@ import telebot
 import json
 import os
 import logging
+from telebot.types import InlineKeyboardMarkup
+from telebot.types import InlineKeyboardButton
 
 # =========================
 
@@ -179,37 +181,79 @@ if video_key not in videos:
 
 if not is_member(message.from_user.id):
 
+    markup = InlineKeyboardMarkup()
+
+    btn1 = InlineKeyboardButton(
+        "📢 Join Channel",
+        url="https://t.me/enakkinajaa"
+    )
+
+    btn2 = InlineKeyboardButton(
+        "👥 Join Group",
+        url="https://t.me/enakkann"
+    )
+
+    btn3 = InlineKeyboardButton(
+        "🔄 Coba Lagi",
+        callback_data=f"check_{video_key}"
+    )
+
+    markup.add(btn1)
+    markup.add(btn2)
+    markup.add(btn3)
+
     bot.send_message(
         message.chat.id,
         """
-```
+👋 Hello
 
-⚠️ Anda harus bergabung terlebih dahulu.
+Anda harus bergabung di Channel/Group saya terlebih dahulu
+untuk melihat video yang dibagikan.
 
-Channel:
-https://t.me/enakkinajaa
+Silakan join terlebih dahulu.
+""",
+        reply_markup=markup
+    )
 
-Group:
-https://t.me/enakkann
-
-Setelah join, buka kembali link video.
-"""
-)
-return
-
-```
-bot.send_video(
-    message.chat.id,
-    videos[video_key]
-)
-```
+    return
 
 # =========================
 
 # RUN BOT
 
 # =========================
+@bot.callback_query_handler(func=lambda call: call.data.startswith("check_"))
+def check_join(call):
 
+    video_key = call.data.replace("check_", "")
+
+    if not is_member(call.from_user.id):
+
+        bot.answer_callback_query(
+            call.id,
+            "❌ Anda belum join."
+        )
+        return
+
+    videos = load_videos()
+
+    if video_key not in videos:
+
+        bot.answer_callback_query(
+            call.id,
+            "❌ Video tidak ditemukan."
+        )
+        return
+
+    bot.answer_callback_query(
+        call.id,
+        "✅ Verifikasi berhasil"
+    )
+
+    bot.send_video(
+        call.message.chat.id,
+        videos[video_key]
+    )
 print("BOT RUNNING...")
 
 bot.infinity_polling(
