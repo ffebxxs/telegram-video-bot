@@ -59,6 +59,7 @@ def check_join(user_id):
 # ======================
 # START LINK HANDLER
 # ======================
+
 @bot.message_handler(commands=['start'])
 
 def start(message):
@@ -98,6 +99,20 @@ def start(message):
 
     send_video(message.chat.id, video_id)
 
+@bot.message_handler(commands=['broadcast'])
+def broadcast(message):
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    text = message.text.replace("/broadcast", "").strip()
+
+    for user_id in users:
+        try:
+            bot.send_message(user_id, text)
+        except:
+            pass
+
+    bot.send_message(message.chat.id, "✅ Broadcast selesai")
 # ======================
 # CHECK BUTTON
 # ======================
