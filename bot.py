@@ -20,12 +20,20 @@ DATA_FILE = "videos.json"
 # ======================
 # LOAD DATABASE
 # ======================
+
+if os.path.exists(USER_FILE):
+    with open(USER_FILE, "r") as f:
+        users = set(json.load(f))
+else:
+    users = set()
+    
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, "r") as f:
         videos = json.load(f)
 else:
     videos = {}
-    users = set()
+
+
 
 def save_data():
     with open(DATA_FILE, "w") as f:
