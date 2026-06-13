@@ -1,277 +1,133 @@
 import telebot
 import json
 import os
-import logging
-from telebot.types import InlineKeyboardMarkup
-from telebot.types import InlineKeyboardButton
-
-# =========================
-
-# CONFIG
-
-# =========================
 
 TOKEN = "8864599968:AAG4z97tu5oagVpEwJWcssswplQiXEnjyVU"
-ADMIN_ID = 8442594829
-
-CHANNEL_USERNAME = "@enakkinajaa"
-GROUP_USERNAME = "@enakkann"
-
-BOT_USERNAME = "enakinajaabot"
-
-DB_FILE = "videos.json"
-
-# =========================
-
-# BOT INIT
-
-# =========================
-
-logging.basicConfig(level=logging.INFO)
-
 bot = telebot.TeleBot(TOKEN)
 
-# =========================
+ADMIN_ID = 8442594829
 
-# DATABASE
+CHANNELS = [
+    "@enakinajaabot",
+    "@enakkann",
+    
+]
 
-# =========================
+DATA_FILE = "videos.json"
 
-def load_videos():
-    if not os.path.exists(DB_FILE):
-        return {}
+# ======================
+# LOAD DATABASE
+# ======================
+if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "r") as f:
+        videos = json.load(f)
+else:
+    videos = {}
 
-    try:
-        with open(DB_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return {}
+def save_data():
+    with open(DATA_FILE, "w") as f:
+        json.dump(videos, f)
 
+# ======================
+# CEK JOIN
+# ======================
+def check_join(user_id):
+    for ch in CHANNELS:
+        try:
+            status = bot.get_chat_member(ch, user_id).status
+            if status in ["left", "kicked"]:
+                return False
+        except:
+            return False
+    return True
 
-def save_videos(data):
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
-# =========================
-
-# FORCE JOIN CHECK
-
-# =========================
-def is_member(user_id):
-    try:
-        channel_member = bot.get_chat_member(
-            CHANNEL_USERNAME,
-            user_id
-        )
-
-        group_member = bot.get_chat_member(
-            GROUP_USERNAME,
-            user_id
-        )
-
-        channel_ok = channel_member.status in [
-            "member",
-            "administrator",
-            "creator"
-        ]
-
-        group_ok = group_member.status in [
-            "member",
-            "administrator",
-            "creator"
-        ]
-
-        return channel_ok and group_ok
-
-    except Exception as e:
-        logging.error(e)
-        return False
-
-# =========================
-
-# ADMIN COMMAND
-
-# =========================
-
-@bot.message_handler(commands=["id"])
-def get_id(message):
-    bot.reply_to(
-        message,
-        f"Your ID: {message.from_user.id}"
-    )
-
-# =========================
-
-# ADMIN UPLOAD VIDEO
-
-# =========================
-
-@bot.message_handler(content_types=["video"])
-def upload_video(message):
-
-    if message.from_user.id != ADMIN_ID:
-        bot.reply_to(message, "❌ Akses ditolak.")
-        return
-
-    videos = load_videos()
-
-    video_key = f"v{len(videos)+1}"
-
-    videos[video_key] = message.video.file_id
-
-    save_videos(videos)
-
-    link = (
-        f"https://t.me/{BOT_USERNAME}?start={video_key}"
-    )
-
-    bot.reply_to(
-        message,
-        f"""
-✅ Video berhasil disimpan
-
-Kode: {video_key}
-
-Link:
-{link}
-"""
-    )
-    return
-
-videos = load_videos()
-
-video_key = f"v{len(videos)+1}"
-
-videos[video_key] = message.video.file_id
-
-save_videos(videos)
-
-link = (
-    f"https://t.me/"
-    f"{BOT_USERNAME}"
-    f"?start={video_key}"
-)
-
-bot.reply_to(
-    message,
-    f"""
-
-✅ Video berhasil disimpan
-
-Kode: {video_key}
-
-Link:
-{link}
-"""
-)
-
-# =========================
-
-# START COMMAND
-
-# =========================
-
-@bot.message_handler(commands=["start"])
+# ======================
+# START LINK HANDLER
+# ======================
+@bot.message_handler(commands=['start'])
 def start(message):
-
     args = message.text.split()
 
-    if len(args) < 2:
-        bot.send_message(
-            message.chat.id,
-            "👋 Selamat datang."
-        )
+    if len(args) == 1:
+        bot.send_message(message.chat.id, "Gunakan link dari channel.")
         return
 
-    video_key = args[1]
+    video_id = args[1].replace("video_", "")
 
-    videos = load_videos()
+    if not check_join(message.from_user.id):
+        markup = telebot.types.InlineKeyboardMarkup()
 
-    if video_key not in videos:
-        bot.send_message(
-            message.chat.id,
-            "❌ Video tidak ditemukan."
+        for ch in CHANNELS:
+            markup.add(
+                telebot.types.InlineKeyboardButton(
+                    "Join " + ch,
+                    url=f"https://t.me/{ch.replace('@','')}"
+                )
+            )
+
+        markup.add(
+            telebot.types.InlineKeyboardButton(
+                "🔄 Saya sudah join",
+                callback_data=f"check_{video_id}"
+            )
         )
-        return
-
-    if not is_member(message.from_user.id):
-
-        markup = InlineKeyboardMarkup()
-
-        btn1 = InlineKeyboardButton(
-            "📢 Join Channel",
-            url="https://t.me/enakkinajaa"
-        )
-
-        btn2 = InlineKeyboardButton(
-            "👥 Join Group",
-            url="https://t.me/enakkann"
-        )
-
-        btn3 = InlineKeyboardButton(
-            "🔄 Coba Lagi",
-            callback_data=f"check_{video_key}"
-        )
-
-        markup.add(btn1)
-        markup.add(btn2)
-        markup.add(btn3)
 
         bot.send_message(
             message.chat.id,
-            """
-👋 Hello
-
-Anda harus bergabung di Channel/Group saya terlebih dahulu
-untuk melihat video yang dibagikan.
-
-Silakan join terlebih dahulu.
-""",
+            "❌ Kamu harus join semua channel/grup dulu!",
             reply_markup=markup
         )
-
         return
-# =========================
 
-# RUN BOT
+    send_video(message.chat.id, video_id)
 
-# =========================
+# ======================
+# CHECK BUTTON
+# ======================
 @bot.callback_query_handler(func=lambda call: call.data.startswith("check_"))
-def check_join(call):
+def callback_check(call):
+    video_id = call.data.split("_")[1]
 
-    video_key = call.data.replace("check_", "")
-
-    if not is_member(call.from_user.id):
-
-        bot.answer_callback_query(
-            call.id,
-            "❌ Anda belum join."
-        )
+    if not check_join(call.from_user.id):
+        bot.answer_callback_query(call.id, "Kamu belum join semua!")
         return
 
-    videos = load_videos()
+    send_video(call.message.chat.id, video_id)
 
-    if video_key not in videos:
+# ======================
+# SEND VIDEO
+# ======================
+def send_video(chat_id, video_id):
+    if video_id in videos:
+        bot.send_video(chat_id, videos[video_id])
+    else:
+        bot.send_message(chat_id, "Video tidak ditemukan.")
 
-        bot.answer_callback_query(
-            call.id,
-            "❌ Video tidak ditemukan."
-        )
+# ======================
+# UPLOAD VIDEO ADMIN
+# ======================
+@bot.message_handler(commands=['upload'])
+def upload(message):
+    if message.from_user.id != ADMIN_ID:
         return
 
-    bot.answer_callback_query(
-        call.id,
-        "✅ Verifikasi berhasil"
-    )
+    msg = bot.send_message(message.chat.id, "Kirim video sekarang...")
+    bot.register_next_step_handler(msg, save_video)
 
-    bot.send_video(
-        call.message.chat.id,
-        videos[video_key]
-    )
-print("BOT RUNNING...")
+def save_video(message):
+    if not message.video:
+        bot.send_message(message.chat.id, "Itu bukan video.")
+        return
 
-bot.infinity_polling(
-skip_pending=True,
-timeout=60,
-long_polling_timeout=60
-)
+    file_id = message.video.file_id
+
+    video_id = str(len(videos) + 1)
+    videos[video_id] = file_id
+    save_data()
+
+    link = f"https://t.me/{bot.get_me().username}?start=video_{video_id}"
+
+    bot.send_message(message.chat.id, f"✅ Video disimpan!\nLink:\n{link}")
+
+# ======================
+bot.polling()
