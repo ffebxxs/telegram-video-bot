@@ -8,7 +8,7 @@ bot = telebot.TeleBot(TOKEN)
 ADMIN_ID = 8442594829
 
 CHANNELS = [
-    "@nakkinajaa",
+    "@enakkinajaa",
     "@enakkann",
     
 ]
