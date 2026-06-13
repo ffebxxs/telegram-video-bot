@@ -109,11 +109,32 @@ def get_id(message):
 @bot.message_handler(content_types=["video"])
 def upload_video(message):
 
+    if message.from_user.id != ADMIN_ID:
+        bot.reply_to(message, "❌ Akses ditolak.")
+        return
 
-if message.from_user.id != ADMIN_ID:
+    videos = load_videos()
+
+    video_key = f"v{len(videos)+1}"
+
+    videos[video_key] = message.video.file_id
+
+    save_videos(videos)
+
+    link = (
+        f"https://t.me/{BOT_USERNAME}?start={video_key}"
+    )
+
     bot.reply_to(
         message,
-        "❌ Akses ditolak."
+        f"""
+✅ Video berhasil disimpan
+
+Kode: {video_key}
+
+Link:
+{link}
+"""
     )
     return
 
