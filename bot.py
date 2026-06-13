@@ -174,53 +174,52 @@ Link:
 @bot.message_handler(commands=["start"])
 def start(message):
 
+    args = message.text.split()
 
-args = message.text.split()
+    if len(args) < 2:
+        bot.send_message(
+            message.chat.id,
+            "👋 Selamat datang."
+        )
+        return
 
-if len(args) < 2:
-    bot.send_message(
-        message.chat.id,
-        "👋 Selamat datang."
-    )
-    return
+    video_key = args[1]
 
-video_key = args[1]
+    videos = load_videos()
 
-videos = load_videos()
+    if video_key not in videos:
+        bot.send_message(
+            message.chat.id,
+            "❌ Video tidak ditemukan."
+        )
+        return
 
-if video_key not in videos:
-    bot.send_message(
-        message.chat.id,
-        "❌ Video tidak ditemukan."
-    )
-    return
+    if not is_member(message.from_user.id):
 
-if not is_member(message.from_user.id):
+        markup = InlineKeyboardMarkup()
 
-    markup = InlineKeyboardMarkup()
+        btn1 = InlineKeyboardButton(
+            "📢 Join Channel",
+            url="https://t.me/enakkinajaa"
+        )
 
-    btn1 = InlineKeyboardButton(
-        "📢 Join Channel",
-        url="https://t.me/enakkinajaa"
-    )
+        btn2 = InlineKeyboardButton(
+            "👥 Join Group",
+            url="https://t.me/enakkann"
+        )
 
-    btn2 = InlineKeyboardButton(
-        "👥 Join Group",
-        url="https://t.me/enakkann"
-    )
+        btn3 = InlineKeyboardButton(
+            "🔄 Coba Lagi",
+            callback_data=f"check_{video_key}"
+        )
 
-    btn3 = InlineKeyboardButton(
-        "🔄 Coba Lagi",
-        callback_data=f"check_{video_key}"
-    )
+        markup.add(btn1)
+        markup.add(btn2)
+        markup.add(btn3)
 
-    markup.add(btn1)
-    markup.add(btn2)
-    markup.add(btn3)
-
-    bot.send_message(
-        message.chat.id,
-        """
+        bot.send_message(
+            message.chat.id,
+            """
 👋 Hello
 
 Anda harus bergabung di Channel/Group saya terlebih dahulu
@@ -228,11 +227,10 @@ untuk melihat video yang dibagikan.
 
 Silakan join terlebih dahulu.
 """,
-        reply_markup=markup
-    )
+            reply_markup=markup
+        )
 
-    return
-
+        return
 # =========================
 
 # RUN BOT
