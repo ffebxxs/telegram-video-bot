@@ -11,7 +11,7 @@ from telebot.types import InlineKeyboardButton
 
 # =========================
 
-TOKEN = "TOKEN_BARU_KAMU"
+TOKEN = "8864599968:AAG4z97tu5oagVpEwJWcssswplQiXEnjyVU"
 ADMIN_ID = 8442594829
 
 CHANNEL_USERNAME = "@enakkinajaa"
